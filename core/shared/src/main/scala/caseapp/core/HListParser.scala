@@ -130,18 +130,18 @@ object HListParser {
 
   implicit def hconsRecursive[K <: Symbol, H, HD, T <: HList, PT <: HList, DT <: HList, NT <: HList, VT <: HList, MT <: HList, HT <: HList, RT <: HList]
    (implicit
-     headParser: Strict[Parser.Aux[H, HD]],
+     headParser: Parser.Aux[H, HD],
      tail: Aux[T, DT, NT, VT, MT, HT, RT, PT]
    ): Aux[FieldType[K, H] :: T, Option[H] :: DT, Nil.type :: NT, None.type :: VT, None.type :: MT, None.type :: HT, Some[Recurse] :: RT, HD :: PT] =
     instance { (default0, names, valueDescriptions, helpMessages, noHelp) =>
       val tailParser = tail(default0.tail, names.tail, valueDescriptions.tail, helpMessages.tail, noHelp.tail)
 
       new Parser[FieldType[K, H] :: T] {
-        val args = headParser.value.args ++ tailParser.args
+        val args = headParser.args ++ tailParser.args
         type D = HD :: PT
-        def init = headParser.value.init :: tailParser.init
+        def init = headParser.init :: tailParser.init
         def step(args: Seq[String], d: HD :: PT) =
-          headParser.value.step(args, d.head).right.flatMap {
+          headParser.step(args, d.head).right.flatMap {
             case None =>
               tailParser.step(args, d.tail).right.map(_.map {
                 case (t, args) => (d.head :: t, args)
@@ -151,7 +151,7 @@ object HListParser {
           }
         def get(d: HD :: PT) =
           for {
-            h <- headParser.value.get(d.head).right
+            h <- headParser.get(d.head).right
             t <- tailParser.get(d.tail).right
           } yield field[K](h) :: t
       }

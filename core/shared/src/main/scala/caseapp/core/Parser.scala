@@ -81,9 +81,9 @@ abstract class LowPriorityParserImplicits {
     helpMessages: Annotations.Aux[HelpMessage, CC, M],
     noHelp: Annotations.Aux[Hidden, CC, H],
     recurse: Annotations.Aux[Recurse, CC, R],
-    parser: Strict[HListParser.Aux[L, D, N, V, M, H, R, P]]
+    parser: HListParser.Aux[L, D, N, V, M, H, R, P]
    ): Parser.Aux[CC, P] =
-    parser.value(defaults(), names(), valuesDesc(), helpMessages(), noHelp()).map(gen.from)
+    parser(defaults(), names(), valuesDesc(), helpMessages(), noHelp()).map(gen.from)
 }
 
 object Parser extends LowPriorityParserImplicits {
